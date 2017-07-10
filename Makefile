@@ -4,7 +4,7 @@ build:
 	docker build -t image-builder-odroid-c2 .
 
 sd-image: build
-	docker run --rm --privileged -v $(shell pwd):/workspace -v /boot:/boot -v /lib/modules:/lib/modules -e VERSION image-builder-odroid-c2
+	docker run --rm --privileged -v $(shell pwd):/workspace -v $(shell pwd)/builder:/builder -v $(shell pwd)/downloads:/downloads -v $(shell pwd)/build:/build -v $(shell pwd)/images:/images -v /boot:/boot -v /lib/modules:/lib/modules -e VERSION image-builder-odroid-c2
 
 shell: build
 	docker run -ti --privileged -v $(shell pwd):/workspace -v /boot:/boot -v /lib/modules:/lib/modules -e VERSION image-builder-odroid-c2 bash

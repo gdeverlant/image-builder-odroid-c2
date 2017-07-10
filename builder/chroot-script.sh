@@ -50,7 +50,7 @@ function get_gpg(){
   if [[ "${KEY_URL}" =~ ^https?://* ]]; then
     echo "loading key from url"
     KEY_FILE=temp.gpg.key
-    wget -q -O "${KEY_FILE}" "${KEY_URL}"
+    wget -q -O "${KEY_FILE}" "${KEY_URL}" --progress=bar:force 2>&1 | showProgressBar
   elif [[ -z "${KEY_URL}" ]]; then
     echo "no source given try to load from key server"
 #    gpg --keyserver "${KEYSERVER}" --recv-keys "${GPG_KEY}"
@@ -85,7 +85,6 @@ function get_gpg(){
   fi
 }
 
-
 ## examples:
 # clean_print {print|fpr|long|short} {GPGKEYID|FINGERPRINT}
 # get_gpg {GPGKEYID|FINGERPRINT} [URL|FILE]
@@ -118,13 +117,22 @@ echo 'deb https://packagecloud.io/Hypriot/Schatzkiste/debian/ jessie main' >> /e
 # add armhf as additional architecure (see below)
 dpkg --add-architecture armhf
 
-# update all apt repository lists
-export DEBIAN_FRONTEND=noninteractive
-apt-get update
-apt-get upgrade -y
+LXC_RESULT="$(dpkg-query -l lxc || echo Non-existent)"
+echo "************************ LXC_RESULT : $LXC_RESULT ************************"
 
+# if there is no existing LXC then install all the packages.
+if [[ $LXC_RESULT == "Non-existent" ]]; then
+  echo $LXC_RESULT
+else
+  echo "************************ LXC_RESULT EXISTS ************************"
+fi
+
+# if there is no existing LXC then install all the packages.
+if [[ ! -e "/installed" ]]; then
 # define packages to install
 packages=(
+    # install xz tools
+    xz-utils
     # as the Odroid C2 does not have a hardware clock we need a fake one
     fake-hwclock
 
@@ -144,26 +152,68 @@ packages=(
     python-pip
 )
 
+# update all apt repository lists
+export DEBIAN_FRONTEND=noninteractive
+apt-get update
+apt-get upgrade -y
+
 apt-get -y install --no-install-recommends ${packages[*]}
 
+touch /installed
+fi
+
+DOWNLOADS_PATH="/downloads"
 # install docker-engine
-DOCKER_DEB=$(mktemp)
-wget -q -O "$DOCKER_DEB" "$DOCKER_DEB_URL"
-echo "${DOCKER_DEB_CHECKSUM} ${DOCKER_DEB}" | sha256sum -c -
-dpkg -i "$DOCKER_DEB"
+#DOCKER_DEB=$(mktemp)
+DOCKER_DEB_PATH="$DOWNLOADS_PATH/$DOCKER_FILENAME"
+# download our base root file system
+if [ ! -e "$DOCKER_DEB_PATH" ]; then
+  wget -q -O "$DOCKER_DEB_PATH" "$DOCKER_DEB_URL" --progress=bar:force 2>&1 | showProgressBar
+  echo "${DOCKER_DEB_CHECKSUM} ${DOCKER_DEB_PATH}" | sha256sum -c -
+  dpkg -i "$DOCKER_DEB_PATH"
+else
+  echo "$DOCKER_DEB_PATH already exists no need to download again."
+fi
+#wget -q -O "$DOCKER_DEB" "$DOCKER_DEB_URL"
+#echo "${DOCKER_DEB_CHECKSUM} ${DOCKER_DEB}" | sha256sum -c -
+#dpkg -i "$DOCKER_DEB"
 
-# install docker-compose
-pip install docker-compose=="${DOCKER_COMPOSE_VERSION}"
+DOCKER_COMPOSE_RESULT="$(docker-compose -v || echo Non-existent)"
+echo "************************ DOCKER_COMPOSE_RESULT : $DOCKER_COMPOSE_RESULT ************************"
+if [[ $DOCKER_COMPOSE_RESULT == "Non-existent" ]]; then
+  # install docker-compose
+  pip install docker-compose=="${DOCKER_COMPOSE_VERSION}"
+fi
 
+DOCKER_MACHINE_PATH="$DOWNLOADS_PATH/docker-machine-$(uname -s)-$(uname -m)"
+# download our base root file system
+if [ ! -e "$DOCKER_MACHINE_PATH" ]; then
+  wget -q -O "$DOCKER_MACHINE_PATH" "https://github.com/docker/machine/releases/download/v${DOCKER_MACHINE_VERSION}/docker-machine-$(uname -s)-$(uname -m)" --progress=bar:force 2>&1 | showProgressBar
+  cp "$DOCKER_MACHINE_PATH" /usr/local/bin/docker-machine
+  chmod +x /usr/local/bin/docker-machine
+else
+  echo "$DOCKER_MACHINE_PATH already exists no need to download again."
+fi
 # install docker-machine
-curl -L "https://github.com/docker/machine/releases/download/v${DOCKER_MACHINE_VERSION}/docker-machine-$(uname -s)-$(uname -m)" > /usr/local/bin/docker-machine
-chmod +x /usr/local/bin/docker-machine
+#curl -L "https://github.com/docker/machine/releases/download/v${DOCKER_MACHINE_VERSION}/docker-machine-$(uname -s)-$(uname -m)" > /usr/local/bin/docker-machine
 
 # install linux kernel for Odroid C2
 apt-get -y install \
     --no-install-recommends \
-    u-boot-tools \
-    "linux-image-${KERNEL_VERSION}"
+    u-boot-tools # Removed default kernel installation \
+    #"linux-image-${KERNEL_VERSION}"
+
+# install latest mainline 4.12 kernel
+KERNEL_MAINLINE_FILE="linux-4.12.0-gx-117138-g2921528.tar.xz"
+KERNEL_MAINLINE_URL="https://www.dropbox.com/sh/l751jmswzr2v6o2/AACr-5PQddmFrE8Lj-3Bhlnoa/$KERNEL_MAINLINE_FILE?dl=0"
+KERNEL_PATH="$DOWNLOADS_PATH/$KERNEL_MAINLINE_FILE"
+if [ ! -e "$KERNEL_PATH" ]; then
+  wget -q -O "$KERNEL_PATH" $KERNEL_MAINLINE_URL --progress=bar:force 2>&1 | showProgressBar
+  tar --numeric-owner -C / -xhpPJf $KERNEL_PATH
+  cp /boot/mainline.boot.ini /boot/boot.ini
+else
+  echo "$KERNEL_MAINLINE_FILE already exists no need to download again."
+fi
 
 # Restore os-release additions
 cat /tmp/os-release.add >> /etc/os-release

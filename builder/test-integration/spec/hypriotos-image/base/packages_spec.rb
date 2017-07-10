@@ -25,3 +25,7 @@ end
 describe package('fake-hwclock') do
   it { should be_installed }
 end
+
+describe package('xz-utils') do
+  it { should be_installed }
+end
