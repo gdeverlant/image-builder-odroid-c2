@@ -203,7 +203,7 @@ apt-get -y install \
     u-boot-tools # Removed default kernel installation \
     #"linux-image-${KERNEL_VERSION}"
 
-# install latest mainline 4.12 kernel
+# install latest mainline 4.13 kernel
 KERNEL_MAINLINE_FILE="linux-4.13.0-rc4-gx-130271-gabe3c92.tar.xz"
 KERNEL_MAINLINE_URL="https://www.dropbox.com/sh/l751jmswzr2v6o2/AACr-5PQddmFrE8Lj-3Bhlnoa/$KERNEL_MAINLINE_FILE?dl=0"
 KERNEL_PATH="$DOWNLOADS_PATH/$KERNEL_MAINLINE_FILE"
