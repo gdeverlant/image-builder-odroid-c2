@@ -118,13 +118,13 @@ echo 'deb https://packagecloud.io/Hypriot/Schatzkiste/debian/ jessie main' >> /e
 dpkg --add-architecture armhf
 
 LXC_RESULT="$(dpkg-query -l lxc || echo Non-existent)"
-echo "************************ LXC_RESULT : $LXC_RESULT ************************"
+#echo "************************ LXC_RESULT : $LXC_RESULT ************************"
 
 # if there is no existing LXC then install all the packages.
 if [[ $LXC_RESULT == "Non-existent" ]]; then
   echo $LXC_RESULT
 else
-  echo "************************ LXC_RESULT EXISTS ************************"
+  echo "************************ LXC exists already no need to install it ************************"
 fi
 
 # if there is no existing LXC then install all the packages.
@@ -179,7 +179,7 @@ fi
 #dpkg -i "$DOCKER_DEB"
 
 DOCKER_COMPOSE_RESULT="$(docker-compose -v || echo Non-existent)"
-echo "************************ DOCKER_COMPOSE_RESULT : $DOCKER_COMPOSE_RESULT ************************"
+#echo "************************ DOCKER_COMPOSE_RESULT : $DOCKER_COMPOSE_RESULT ************************"
 if [[ $DOCKER_COMPOSE_RESULT == "Non-existent" ]]; then
   # install docker-compose
   pip install docker-compose=="${DOCKER_COMPOSE_VERSION}"
@@ -204,7 +204,7 @@ apt-get -y install \
     #"linux-image-${KERNEL_VERSION}"
 
 # install latest mainline 4.12 kernel
-KERNEL_MAINLINE_FILE="linux-4.12.0-gx-117138-g2921528.tar.xz"
+KERNEL_MAINLINE_FILE="linux-4.13.0-rc4-gx-130271-gabe3c92.tar.xz"
 KERNEL_MAINLINE_URL="https://www.dropbox.com/sh/l751jmswzr2v6o2/AACr-5PQddmFrE8Lj-3Bhlnoa/$KERNEL_MAINLINE_FILE?dl=0"
 KERNEL_PATH="$DOWNLOADS_PATH/$KERNEL_MAINLINE_FILE"
 if [ ! -e "$KERNEL_PATH" ]; then
