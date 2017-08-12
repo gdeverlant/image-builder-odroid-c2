@@ -169,7 +169,7 @@ DOCKER_DEB_PATH="$DOWNLOADS_PATH/$DOCKER_FILENAME"
 # download our base root file system
 if [ ! -e "$DOCKER_DEB_PATH" ]; then
   wget -q -O "$DOCKER_DEB_PATH" "$DOCKER_DEB_URL" --progress=bar:force 2>&1 | showProgressBar
-  echo "${DOCKER_DEB_CHECKSUM} ${DOCKER_DEB_PATH}" | sha256sum -c -
+  echo "${DOCKER_DEB_CHECKSUM} ${DOCKER_DEB_PATH}" #| sha256sum -c -
   dpkg -i "$DOCKER_DEB_PATH"
 else
   echo "$DOCKER_DEB_PATH already exists no need to download again."
@@ -204,7 +204,7 @@ apt-get -y install \
     #"linux-image-${KERNEL_VERSION}"
 
 # install latest mainline 4.13 kernel
-KERNEL_MAINLINE_FILE="linux-4.13.0-rc4-gx-130271-gabe3c92.tar.xz"
+KERNEL_MAINLINE_FILE="linux-4.13.0-rc4-gx-130271-gabe3c92 .tar.xz"
 KERNEL_MAINLINE_URL="https://www.dropbox.com/sh/l751jmswzr2v6o2/AACr-5PQddmFrE8Lj-3Bhlnoa/$KERNEL_MAINLINE_FILE?dl=0"
 KERNEL_PATH="$DOWNLOADS_PATH/$KERNEL_MAINLINE_FILE"
 if [ ! -e "$KERNEL_PATH" ]; then
