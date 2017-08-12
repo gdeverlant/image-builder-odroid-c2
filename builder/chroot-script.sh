@@ -205,7 +205,7 @@ apt-get -y install \
 
 # install latest mainline 4.13 kernel
 KERNEL_MAINLINE_FILE="linux-4.13.0-rc4-gx-130271-gabe3c92.tar.xz"
-KERNEL_MAINLINE_URL="https://www.dropbox.com/sh/l751jmswzr2v6o2/AACr-5PQddmFrE8Lj-3Bhlnoa/$KERNEL_MAINLINE_FILE?dl=0"
+KERNEL_MAINLINE_URL="https://www.dropbox.com/sh/l751jmswzr2v6o2/AAAOhZQLkxAgBr63ho-gA0pja/$KERNEL_MAINLINE_FILE?dl=1"
 KERNEL_PATH="$DOWNLOADS_PATH/$KERNEL_MAINLINE_FILE"
 if [ ! -e "$KERNEL_PATH" ]; then
   wget -q -O "$KERNEL_PATH" $KERNEL_MAINLINE_URL --progress=bar:force 2>&1 | showProgressBar
