@@ -169,7 +169,7 @@ DOCKER_DEB_PATH="$DOWNLOADS_PATH/$DOCKER_FILENAME"
 # download our base root file system
 if [ ! -e "$DOCKER_DEB_PATH" ]; then
   wget -q -O "$DOCKER_DEB_PATH" "$DOCKER_DEB_URL" --progress=bar:force 2>&1 | showProgressBar
-  echo "${DOCKER_DEB_CHECKSUM} ${DOCKER_DEB_PATH}" | sha256sum -c -
+  echo "${DOCKER_DEB_CHECKSUM} ${DOCKER_DEB_PATH}" #| sha256sum -c -
   dpkg -i "$DOCKER_DEB_PATH"
 else
   echo "$DOCKER_DEB_PATH already exists no need to download again."
